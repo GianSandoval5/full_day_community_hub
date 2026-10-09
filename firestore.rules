@@ -1,0 +1,84 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function validShortText(value, maxSize) {
+      return value is string && value.size() > 0 && value.size() <= maxSize;
+    }
+
+    function validParticipant() {
+      return request.resource.data.keys().hasAll([
+          'uid', 'name', 'role', 'community', 'joinedAt', 'lastSeenAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'uid', 'name', 'role', 'community', 'joinedAt', 'lastSeenAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && validShortText(request.resource.data.name, 80)
+        && validShortText(request.resource.data.role, 80)
+        && validShortText(request.resource.data.community, 80)
+        && request.resource.data.joinedAt is timestamp
+        && request.resource.data.lastSeenAt is timestamp;
+    }
+
+    function validMessage() {
+      return request.resource.data.keys().hasAll([
+          'id', 'authorId', 'authorName', 'authorRole',
+          'authorCommunity', 'text', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id', 'authorId', 'authorName', 'authorRole',
+          'authorCommunity', 'text', 'createdAt'
+        ])
+        && request.resource.data.authorId == request.auth.uid
+        && validShortText(request.resource.data.authorName, 80)
+        && validShortText(request.resource.data.authorRole, 80)
+        && validShortText(request.resource.data.authorCommunity, 80)
+        && validShortText(request.resource.data.text, 280)
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    match /participants/{userId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.joinedAt == request.time
+        && request.resource.data.lastSeenAt == request.time
+        && validParticipant();
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.joinedAt == resource.data.joinedAt
+        && request.resource.data.lastSeenAt == request.time
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name', 'role', 'community', 'lastSeenAt'
+        ])
+        && validParticipant();
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /messages/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.id == messageId
+        && request.resource.data.createdAt == request.time
+        && validMessage();
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'text'
+        ])
+        && validMessage();
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+  }
+}

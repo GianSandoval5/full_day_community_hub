@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "813547703892",
+    "project_id": "full-day-comunnity-hub",
+    "storage_bucket": "full-day-comunnity-hub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813547703892:android:2b872c567ef00cfe69e7c1",
+        "android_client_info": {
+          "package_name": "fulldaycommunityhub.web.gs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxHTfYPQpHmFQ5vGrU3VgKrWQZAMb1CII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
