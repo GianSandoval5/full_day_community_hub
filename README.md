@@ -30,11 +30,10 @@ El workspace está configurado para el proyecto existente
 2. En Authentication → Sign-in method, habilita **Anonymous**.
 3. Crea la base Cloud Firestore predeterminada.
 4. Conserva el plan Spark.
-5. Publica las reglas únicamente después de revisarlas:
+5. Publica las reglas e índices únicamente después de revisarlos:
 
 ```bash
-firebase use full-day-comunnity-hub
-firebase deploy --only firestore:rules
+firebase deploy --only firestore --project full-day-comunnity-hub
 ```
 
 No se incluye `.firebaserc` para evitar seleccionar un proyecto de forma
@@ -59,14 +58,38 @@ flutter test
 flutter build web
 ```
 
+## Despliegues Firebase del Hub
+
+Ejecuta los comandos desde `full_day_community_hub`.
+
+Solo reglas:
+
+```bash
+firebase deploy --only firestore:rules --project full-day-comunnity-hub
+```
+
+Solo índices:
+
+```bash
+firebase deploy --only firestore:indexes --project full-day-comunnity-hub
+```
+
+Reglas e índices juntos:
+
+```bash
+firebase deploy --only firestore --project full-day-comunnity-hub
+```
+
 ## Hosting clásico
 
 `firebase.json` usa `build/web` y una rewrite a `index.html`.
 
+Hosting es opcional durante el desarrollo local, pero se utiliza para publicar
+el Wall que se proyectará durante el workshop:
+
 ```bash
-flutter build web
-firebase use full-day-comunnity-hub
-firebase deploy --only hosting
+flutter build web --release
+firebase deploy --only hosting --project full-day-comunnity-hub
 ```
 
 No ejecutes deploy sin confirmar antes el proyecto seleccionado.
